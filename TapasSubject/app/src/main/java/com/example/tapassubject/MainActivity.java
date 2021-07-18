@@ -6,6 +6,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -19,10 +21,12 @@ import com.example.tapassubject.model.PaginationModel;
 import com.example.tapassubject.model.SeriesModel;
 import com.example.tapassubject.retrofit.RetrofitConnector;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 import okhttp3.Headers;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -34,6 +38,7 @@ public class MainActivity extends AppCompatActivity implements IBrowseModelListe
     private Button prevBtn;
     private Button nextBtn;
     public List<String> todoBitmapList = new ArrayList<>();
+    private List<Bitmap> itemList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,9 +47,7 @@ public class MainActivity extends AppCompatActivity implements IBrowseModelListe
 
         mainHandler = new Handler();
 
-        ArrayList<Bitmap> temp = new ArrayList<Bitmap>();
-
-        customAdapter = new CustomAdapter(temp);
+        customAdapter = new CustomAdapter(itemList);
 
         recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -57,13 +60,36 @@ public class MainActivity extends AppCompatActivity implements IBrowseModelListe
     }
 
     @Override
+    public void OnBeforeStartTask() {
+        todoBitmapList.clear();
+    }
+
+    @Override
     public void OnAddImageURL(String url) {
         todoBitmapList.add(url);
     }
 
     @Override
     public void OnFinishBrowseModelRequest() {
+        for(String url : todoBitmapList)
+        {
+            Call<ResponseBody> imagedownload = RetrofitConnector.getApiService().downloadImage(url);
+            imagedownload.enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    InputStream is = response.body().byteStream();
+                    Bitmap bitmap = BitmapFactory.decodeStream(is);
+                    itemList.add(bitmap);
 
+                    customAdapter.notifyDataSetChanged();
+                }
+
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+
+                }
+            });
+        }
     }
 
     private class BrowseInfo

@@ -14,10 +14,11 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder> {
 
-    private ArrayList<Bitmap> mData = null;
+    private List<Bitmap> mData = null;
 
     public class ViewHolder extends RecyclerView.ViewHolder
     {
@@ -36,7 +37,7 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
         }
     }
 
-    public CustomAdapter(ArrayList<Bitmap> list)
+    public CustomAdapter(List<Bitmap> list)
     {
         this.mData = list;
     }
