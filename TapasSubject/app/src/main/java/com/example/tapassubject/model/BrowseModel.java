@@ -1,11 +1,13 @@
 package com.example.tapassubject.model;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class BrowseModel {
     private PaginationModel pagination;
-    private List<SeriesModel> Series = new ArrayList<>();
+    private List<SeriesModel> series = new ArrayList<>();
 
     public PaginationModel getPagination() {
         return pagination;
@@ -16,10 +18,10 @@ public class BrowseModel {
     }
 
     public List<SeriesModel> getSeries() {
-        return Series;
+        return series;
     }
 
-    public void addSeries(SeriesModel series) {
-        Series.add(series);
+    public void setSeries(List<SeriesModel> series) {
+        this.series = series;
     }
 }

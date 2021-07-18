@@ -14,4 +14,6 @@ public class Const {
     {
         return getSeriesURL(series_id) + "/episodes";
     }
+
+    static public String MSG_FAIL_INIT = "초기화에 실패했습니다";
 }
