@@ -14,6 +14,7 @@ import android.os.Handler;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.example.tapassubject.data.ThumbInfo;
 import com.example.tapassubject.list.CustomAdapter;
 import com.example.tapassubject.listener.IBrowseModelListener;
 import com.example.tapassubject.model.BrowseModel;
@@ -35,10 +36,7 @@ public class MainActivity extends AppCompatActivity implements IBrowseModelListe
     private RecyclerView recyclerView;
     private CustomAdapter customAdapter;
     private Handler mainHandler;
-    private Button prevBtn;
-    private Button nextBtn;
-    public List<String> todoBitmapList = new ArrayList<>();
-    private List<Bitmap> itemList = new ArrayList<>();
+    private List<ThumbInfo> itemList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,33 +51,32 @@ public class MainActivity extends AppCompatActivity implements IBrowseModelListe
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(customAdapter);
 
-        prevBtn = findViewById(R.id.button);
-        nextBtn = findViewById(R.id.button2);
-
         new BrowseThread(this , new BrowseInfo("COMICS",1),mainHandler).start();
     }
 
     @Override
     public void OnBeforeStartTask() {
-        todoBitmapList.clear();
+        itemList.clear();
     }
 
     @Override
-    public void OnAddImageURL(String url) {
-        todoBitmapList.add(url);
+    public void OnAddImageInfo(ThumbInfo info) {
+        itemList.add(info);
     }
 
     @Override
     public void OnFinishBrowseModelRequest() {
-        for(String url : todoBitmapList)
+        for(int i = 0 ; i < itemList.size() ; ++i)
         {
-            Call<ResponseBody> imagedownload = RetrofitConnector.getApiService().downloadImage(url);
+            ThumbInfo info = itemList.get(i);
+
+            Call<ResponseBody> imagedownload = RetrofitConnector.getApiService().downloadImage(info.getURL());
             imagedownload.enqueue(new Callback<ResponseBody>() {
                 @Override
                 public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                     InputStream is = response.body().byteStream();
                     Bitmap bitmap = BitmapFactory.decodeStream(is);
-                    itemList.add(bitmap);
+                    info.setBitmap(bitmap);
 
                     customAdapter.notifyDataSetChanged();
                 }
@@ -119,6 +116,8 @@ public class MainActivity extends AppCompatActivity implements IBrowseModelListe
 
         @Override
         public void run() {
+            listener.OnBeforeStartTask();
+
             Call<BrowseModel> browseModelCall = RetrofitConnector.getApiService().requestBrowse(info.first , info.second);
 
             browseModelCall.enqueue(new Callback<BrowseModel>() {
@@ -127,14 +126,22 @@ public class MainActivity extends AppCompatActivity implements IBrowseModelListe
                     BrowseModel browseModel = response.body();
 
                     PaginationModel pm = browseModel.getPagination();
-                    List<SeriesModel> list = browseModel.getSeries();//이걸로 recyclerview만들업주면 되고
+                    List<SeriesModel> list = browseModel.getSeries();
                     for(SeriesModel model : list)
                     {
                         String imgUrl = model.getBook_cover_url();
+                        boolean isBookcover = true;
                         if(imgUrl == null)
+                        {
                             imgUrl = model.getThumb().getFile_url();
+                            isBookcover = false;
+                        }
 
-                        listener.OnAddImageURL(imgUrl);
+                        listener.OnAddImageInfo(
+                                new ThumbInfo(imgUrl
+                                        ,model.getThumb().getWidth()
+                                        ,model.getThumb().getHeight()
+                                        ,isBookcover));
                     }
 
                     listener.OnFinishBrowseModelRequest();

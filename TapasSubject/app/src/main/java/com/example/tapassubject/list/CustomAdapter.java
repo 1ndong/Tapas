@@ -1,6 +1,8 @@
 package com.example.tapassubject.list;
 
 import com.example.tapassubject.R;
+import com.example.tapassubject.data.ThumbInfo;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.util.Log;
@@ -18,7 +20,7 @@ import java.util.List;
 
 public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder> {
 
-    private List<Bitmap> mData = null;
+    private List<ThumbInfo> mData = null;
 
     public class ViewHolder extends RecyclerView.ViewHolder
     {
@@ -37,7 +39,7 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
         }
     }
 
-    public CustomAdapter(List<Bitmap> list)
+    public CustomAdapter(List<ThumbInfo> list)
     {
         this.mData = list;
     }
@@ -55,8 +57,25 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
 
     @Override
     public void onBindViewHolder(CustomAdapter.ViewHolder holder, int position) {
-        Bitmap bitmap = mData.get(position);
-        holder.imageView.setImageBitmap(bitmap);
+        ThumbInfo info = mData.get(position);
+
+        int width = 0;
+        int height = 0;
+        if(info.isBookcover())
+        {
+            width = holder.imageView.getLayoutParams().width;
+            height = (int)(width * 1.5);
+        }
+        else
+        {
+            width = holder.imageView.getLayoutParams().width;
+            height = width;
+        }
+
+        holder.imageView.requestLayout();
+        holder.imageView.getLayoutParams().width = width;
+        holder.imageView.getLayoutParams().height = height;
+        holder.imageView.setImageBitmap(info.getBitmap());
     }
 
     @Override
