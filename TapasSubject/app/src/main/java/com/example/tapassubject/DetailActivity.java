@@ -9,6 +9,14 @@ import com.example.tapassubject.model.BrowseModel;
 import com.example.tapassubject.model.EpisodeModel;
 import com.example.tapassubject.model.SeriesModel;
 import com.example.tapassubject.retrofit.RetrofitConnector;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
+
+import org.json.JSONArray;
+
+import java.util.ArrayList;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -38,15 +46,18 @@ public class DetailActivity extends AppCompatActivity {
             }
         });
 */
-        Call<EpisodeModel> episodeModelCall = RetrofitConnector.getApiService().requestEpisode(model.getId());
-        episodeModelCall.enqueue(new Callback<EpisodeModel>() {
+        Call<JsonArray> episodeModelCall = RetrofitConnector.getApiService().requestEpisode(model.getId());
+        episodeModelCall.enqueue(new Callback<JsonArray>() {
             @Override
-            public void onResponse(Call<EpisodeModel> call, Response<EpisodeModel> response) {
-                EpisodeModel model = response.body();
+            public void onResponse(Call<JsonArray> call, Response<JsonArray> response) {
+                JsonArray array = response.body();
+                Gson gson = new Gson();
+                ArrayList<EpisodeModel> result
+                    = gson.fromJson(array.toString() , new TypeToken<ArrayList<EpisodeModel>>(){}.getType());
             }
 
             @Override
-            public void onFailure(Call<EpisodeModel> call, Throwable t) {
+            public void onFailure(Call<JsonArray> call, Throwable t) {
 
             }
         });
