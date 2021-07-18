@@ -1,6 +1,8 @@
 package com.example.tapassubject.model;
 
-public class GenreModel {
+import java.io.Serializable;
+
+public class GenreModel implements Serializable {
     private int id;
     private String name;
     private String abbr;

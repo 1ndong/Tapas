@@ -1,6 +1,8 @@
 package com.example.tapassubject.model;
 
-public class ThumbModel {
+import java.io.Serializable;
+
+public class ThumbModel implements Serializable {
     private int width;
     private int height;
     private int file_size;

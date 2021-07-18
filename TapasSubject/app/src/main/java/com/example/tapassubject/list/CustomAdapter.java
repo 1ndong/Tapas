@@ -1,6 +1,7 @@
 package com.example.tapassubject.list;
 
 import com.example.tapassubject.R;
+import com.example.tapassubject.data.ItemInfo;
 import com.example.tapassubject.data.ThumbInfo;
 
 import android.content.Context;
@@ -38,7 +39,7 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
         }
     }
 
-    private List<ThumbInfo> mData = null;
+    private List<ItemInfo> mData = null;
 
     public interface OnItemClickListener
     {
@@ -51,7 +52,7 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
         itemClickListener = listener;
     }
 
-    public CustomAdapter(List<ThumbInfo> list)
+    public CustomAdapter(List<ItemInfo> list)
     {
         this.mData = list;
     }
@@ -69,7 +70,7 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
 
     @Override
     public void onBindViewHolder(CustomAdapter.ViewHolder holder, int position) {
-        ThumbInfo info = mData.get(position);
+        ThumbInfo info = mData.get(position).getThumbInfo();
 
         int width = 0;
         int height = 0;

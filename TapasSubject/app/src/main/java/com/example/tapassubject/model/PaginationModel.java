@@ -1,6 +1,8 @@
 package com.example.tapassubject.model;
 
-public class PaginationModel {
+import java.io.Serializable;
+
+public class PaginationModel implements Serializable {
     private int page;
     private boolean has_next;
 

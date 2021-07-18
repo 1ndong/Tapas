@@ -1,6 +1,8 @@
 package com.example.tapassubject.model;
 
-public class EpisodeModel {
+import java.io.Serializable;
+
+public class EpisodeModel implements Serializable {
     private int id;
     private String title;
     private int scene;

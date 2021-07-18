@@ -2,10 +2,11 @@ package com.example.tapassubject.model;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BrowseModel {
+public class BrowseModel implements Serializable {
     private PaginationModel pagination;
     private List<SeriesModel> series = new ArrayList<>();
 

@@ -1,6 +1,8 @@
 package com.example.tapassubject.model;
 
-public class CreatorModel {
+import java.io.Serializable;
+
+public class CreatorModel implements Serializable {
     private int id;
     private String uname;
     private String display_name;

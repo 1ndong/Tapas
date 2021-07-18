@@ -1,9 +1,13 @@
 package com.example.tapassubject.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SeriesModel {
+public class SeriesModel implements Serializable {
     private int id;
     private String title;
     private String type;

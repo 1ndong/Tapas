@@ -18,6 +18,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.tapassubject.data.ItemInfo;
 import com.example.tapassubject.data.ThumbInfo;
 import com.example.tapassubject.list.CustomAdapter;
 import com.example.tapassubject.listener.IBrowseModelListener;
@@ -39,7 +40,7 @@ import retrofit2.Response;
 public class MainActivity extends AppCompatActivity implements IBrowseModelListener {
     private RecyclerView recyclerView;
     private CustomAdapter customAdapter;
-    private List<ThumbInfo> itemList = new ArrayList<>();
+    private List<ItemInfo> itemList = new ArrayList<>();
     private TextView statusTextView;
 
     private TextView curPageTextView;
@@ -51,8 +52,6 @@ public class MainActivity extends AppCompatActivity implements IBrowseModelListe
 
     private BrowseThread browseThread = null;
 
-    private final int DETAIL_ACTIVITY = 1001;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,7 +62,10 @@ public class MainActivity extends AppCompatActivity implements IBrowseModelListe
             @Override
             public void onItemClick(View v, int pos) {
                 Intent intent = new Intent(getApplicationContext() , DetailActivity.class);
-                startActivityForResult(intent,DETAIL_ACTIVITY);
+
+                intent.putExtra("model" , itemList.get(pos).getSeriesModel());
+
+                startActivity(intent);
             }
         });
 
@@ -135,15 +137,15 @@ public class MainActivity extends AppCompatActivity implements IBrowseModelListe
     }
 
     @Override
-    public void OnAddImageInfo(ThumbInfo info) {
-        itemList.add(info);
+    public void OnAddItemInfo(ThumbInfo info , SeriesModel model) {
+        itemList.add(new ItemInfo(info,model));
     }
 
     @Override
     public void OnFinishBrowseModelRequest() {
         for(int i = 0 ; i < itemList.size() ; ++i)
         {
-            ThumbInfo info = itemList.get(i);
+            ThumbInfo info = itemList.get(i).getThumbInfo();
 
             Call<ResponseBody> imagedownload = RetrofitConnector.getApiService().downloadImage(info.getURL());
             imagedownload.enqueue(new Callback<ResponseBody>() {
@@ -214,11 +216,11 @@ public class MainActivity extends AppCompatActivity implements IBrowseModelListe
                             isBookcover = false;
                         }
 
-                        listener.OnAddImageInfo(
+                        listener.OnAddItemInfo(
                                 new ThumbInfo(imgUrl
                                         ,model.getThumb().getWidth()
                                         ,model.getThumb().getHeight()
-                                        ,isBookcover));
+                                        ,isBookcover),model);
                     }
 
                     listener.OnFinishBrowseModelRequest();
