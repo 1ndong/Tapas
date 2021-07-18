@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder> {
-
     private List<ThumbInfo> mData = null;
 
     public class ViewHolder extends RecyclerView.ViewHolder

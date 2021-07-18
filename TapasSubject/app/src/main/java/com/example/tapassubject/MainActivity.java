@@ -1,5 +1,6 @@
 package com.example.tapassubject;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.loader.content.AsyncTaskLoader;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -11,7 +12,9 @@ import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.tapassubject.data.ThumbInfo;
@@ -35,28 +38,90 @@ import retrofit2.Response;
 public class MainActivity extends AppCompatActivity implements IBrowseModelListener {
     private RecyclerView recyclerView;
     private CustomAdapter customAdapter;
-    private Handler mainHandler;
     private List<ThumbInfo> itemList = new ArrayList<>();
+    private TextView statusTextView;
+
+    private TextView curPageTextView;
+    private Button prevBtn;
+    private Button nextBtn;
+
+    private int currentPage = 1;
+    private PaginationModel curPaginationModel;
+
+    private BrowseThread browseThread = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mainHandler = new Handler();
-
         customAdapter = new CustomAdapter(itemList);
+
+        statusTextView = findViewById(R.id.statusTextView);
+        curPageTextView = findViewById(R.id.currentPageView);
+        prevBtn = findViewById(R.id.prevBtn);
+        prevBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(currentPage > 1)
+                {
+                    --currentPage;
+                    makeBrowseThread();
+                }
+            }
+        });
+
+        nextBtn = findViewById(R.id.nextBtn);
+        nextBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(curPaginationModel.isHas_next())
+                {
+                    currentPage = curPaginationModel.getPage();
+                    makeBrowseThread();
+                }
+            }
+        });
 
         recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(customAdapter);
 
-        new BrowseThread(this , new BrowseInfo("COMICS",1),mainHandler).start();
+        makeBrowseThread();
+    }
+
+    private void makeBrowseThread()
+    {
+        setPrevBtnEnable(false);
+        setNextBtnEnable(false);
+        new BrowseThread(this , new BrowseInfo("COMICS",currentPage)).start();
+    }
+
+    private void setPrevBtnEnable(boolean enable)
+    {
+        if(curPaginationModel != null && currentPage == 1)
+            prevBtn.setEnabled(false);
+        else
+            prevBtn.setEnabled(enable);
+    }
+
+    private void setNextBtnEnable(boolean enable)
+    {
+        if(curPaginationModel != null && !curPaginationModel.isHas_next())
+            nextBtn.setEnabled(false);
+        else
+            nextBtn.setEnabled(enable);
     }
 
     @Override
     public void OnBeforeStartTask() {
         itemList.clear();
+        statusTextView.setText("start getBrowseModel");
+    }
+
+    @Override
+    public void OnSetPaginationInfo(PaginationModel pm) {
+        curPaginationModel = pm;
     }
 
     @Override
@@ -87,6 +152,10 @@ public class MainActivity extends AppCompatActivity implements IBrowseModelListe
                 }
             });
         }
+        statusTextView.setText("finish getBrowseModel");
+        curPageTextView.setText(""+currentPage);
+        setPrevBtnEnable(true);
+        setNextBtnEnable(true);
     }
 
     private class BrowseInfo
@@ -104,14 +173,12 @@ public class MainActivity extends AppCompatActivity implements IBrowseModelListe
     private class BrowseThread extends Thread {
 
         private BrowseInfo info;
-        private Handler mainHandler;
         private IBrowseModelListener listener;
 
-        public BrowseThread(IBrowseModelListener listener , BrowseInfo info , Handler handler)
+        public BrowseThread(IBrowseModelListener listener , BrowseInfo info)
         {
             this.listener = listener;
             this.info = info;
-            mainHandler = handler;
         }
 
         @Override
@@ -125,7 +192,7 @@ public class MainActivity extends AppCompatActivity implements IBrowseModelListe
                 public void onResponse(Call<BrowseModel> call, Response<BrowseModel> response) {
                     BrowseModel browseModel = response.body();
 
-                    PaginationModel pm = browseModel.getPagination();
+                    listener.OnSetPaginationInfo(browseModel.getPagination());
                     List<SeriesModel> list = browseModel.getSeries();
                     for(SeriesModel model : list)
                     {
