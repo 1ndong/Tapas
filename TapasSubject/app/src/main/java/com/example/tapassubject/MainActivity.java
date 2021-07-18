@@ -6,6 +6,7 @@ import androidx.loader.content.AsyncTaskLoader;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -50,12 +51,21 @@ public class MainActivity extends AppCompatActivity implements IBrowseModelListe
 
     private BrowseThread browseThread = null;
 
+    private final int DETAIL_ACTIVITY = 1001;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         customAdapter = new CustomAdapter(itemList);
+        customAdapter.setOnItemClickListener(new CustomAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(View v, int pos) {
+                Intent intent = new Intent(getApplicationContext() , DetailActivity.class);
+                startActivityForResult(intent,DETAIL_ACTIVITY);
+            }
+        });
 
         statusTextView = findViewById(R.id.statusTextView);
         curPageTextView = findViewById(R.id.currentPageView);

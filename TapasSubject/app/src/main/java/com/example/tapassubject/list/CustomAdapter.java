@@ -19,8 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder> {
-    private List<ThumbInfo> mData = null;
-
     public class ViewHolder extends RecyclerView.ViewHolder
     {
         ImageView imageView;
@@ -29,13 +27,28 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
             super(itemView);
 
             imageView = itemView.findViewById(R.id.image);
-            imageView.setOnClickListener(new View.OnClickListener(){
+            imageView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Log.d("indong","asdf");
+                    int pos = getAdapterPosition();
+                    if(itemClickListener != null)
+                        itemClickListener.onItemClick(view,pos);
                 }
             });
         }
+    }
+
+    private List<ThumbInfo> mData = null;
+
+    public interface OnItemClickListener
+    {
+        void onItemClick(View v , int pos);
+    }
+    private OnItemClickListener itemClickListener = null;
+
+    public void setOnItemClickListener(OnItemClickListener listener)
+    {
+        itemClickListener = listener;
     }
 
     public CustomAdapter(List<ThumbInfo> list)
