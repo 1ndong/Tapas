@@ -10,12 +10,13 @@ public class ThumbInfo {
     private int height;
     private String url;
 
-    public ThumbInfo(String url , int w , int h , boolean isBookcover)
+    public ThumbInfo(String url , int w , int h , boolean isBookcover , Bitmap initBitmap)
     {
         this.url = url;
         width = w;
         height = h;
         this.isBookcover = isBookcover;
+        this.bitmap = initBitmap;
     }
 
     public boolean isBookcover() {

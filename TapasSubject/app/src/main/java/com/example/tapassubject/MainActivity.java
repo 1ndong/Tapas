@@ -13,8 +13,10 @@ import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,10 +24,12 @@ import com.example.tapassubject.data.ItemInfo;
 import com.example.tapassubject.data.ThumbInfo;
 import com.example.tapassubject.list.CustomAdapter;
 import com.example.tapassubject.listener.IBrowseModelListener;
+import com.example.tapassubject.listener.IImageDownLoadListener;
 import com.example.tapassubject.model.BrowseModel;
 import com.example.tapassubject.model.PaginationModel;
 import com.example.tapassubject.model.SeriesModel;
 import com.example.tapassubject.retrofit.RetrofitConnector;
+import com.example.tapassubject.thread.ImageDownThread;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -37,20 +41,21 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MainActivity extends AppCompatActivity implements IBrowseModelListener {
+public class MainActivity extends AppCompatActivity implements IBrowseModelListener , IImageDownLoadListener {
     private RecyclerView recyclerView;
     private CustomAdapter customAdapter;
     private List<ItemInfo> itemList = new ArrayList<>();
     private TextView statusTextView;
 
-    private TextView curPageTextView;
-    private Button prevBtn;
-    private Button nextBtn;
+    private ProgressBar refreshBar;
+    private ProgressBar loadBar;
 
     private int currentPage = 1;
     private PaginationModel curPaginationModel;
 
     private BrowseThread browseThread = null;
+
+    private boolean isLoadingMoreData = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,64 +75,43 @@ public class MainActivity extends AppCompatActivity implements IBrowseModelListe
         });
 
         statusTextView = findViewById(R.id.statusTextView);
-        curPageTextView = findViewById(R.id.currentPageView);
-        prevBtn = findViewById(R.id.prevBtn);
-        prevBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(currentPage > 1)
-                {
-                    --currentPage;
-                    makeBrowseThread();
-                }
-            }
-        });
 
-        nextBtn = findViewById(R.id.nextBtn);
-        nextBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(curPaginationModel.isHas_next())
-                {
-                    currentPage = curPaginationModel.getPage();
-                    makeBrowseThread();
-                }
-            }
-        });
+        refreshBar = findViewById(R.id.refreshBar);
+        loadBar = findViewById(R.id.loadBar);
 
         recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(customAdapter);
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                
+                int lastvisibleItemPosition = ((LinearLayoutManager)recyclerView.getLayoutManager()).findLastCompletelyVisibleItemPosition();
+                int itemTotalCount = recyclerView.getAdapter().getItemCount()-1;
 
-        makeBrowseThread();
+                if(lastvisibleItemPosition == itemTotalCount)
+                {//끝에 도달했으면
+                    if(!isLoadingMoreData)
+                    {
+                        makeBrowseThread(curPaginationModel.getPage());
+                        isLoadingMoreData = true;
+                    }
+                }
+            }
+        });
+
+        makeBrowseThread(1);
     }
 
-    private void makeBrowseThread()
+    private void makeBrowseThread(int page)
     {
-        setPrevBtnEnable(false);
-        setNextBtnEnable(false);
-        new BrowseThread(this , new BrowseInfo("COMICS",currentPage)).start();
-    }
-
-    private void setPrevBtnEnable(boolean enable)
-    {
-        if(curPaginationModel != null && currentPage == 1)
-            prevBtn.setEnabled(false);
-        else
-            prevBtn.setEnabled(enable);
-    }
-
-    private void setNextBtnEnable(boolean enable)
-    {
-        if(curPaginationModel != null && !curPaginationModel.isHas_next())
-            nextBtn.setEnabled(false);
-        else
-            nextBtn.setEnabled(enable);
+        loadBar.setVisibility(View.VISIBLE);
+        new BrowseThread(this , new BrowseInfo("COMICS",page)).start();
     }
 
     @Override
     public void OnBeforeStartTask() {
-        itemList.clear();
         statusTextView.setText("start getBrowseModel");
     }
 
@@ -143,31 +127,23 @@ public class MainActivity extends AppCompatActivity implements IBrowseModelListe
 
     @Override
     public void OnFinishBrowseModelRequest() {
+        customAdapter.notifyDataSetChanged();
+        statusTextView.setText("finish getBrowseModel");
+        isLoadingMoreData = false;
+        loadBar.setVisibility(View.INVISIBLE);
+
         for(int i = 0 ; i < itemList.size() ; ++i)
         {
             ThumbInfo info = itemList.get(i).getThumbInfo();
-
-            Call<ResponseBody> imagedownload = RetrofitConnector.getApiService().downloadImage(info.getURL());
-            imagedownload.enqueue(new Callback<ResponseBody>() {
-                @Override
-                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                    InputStream is = response.body().byteStream();
-                    Bitmap bitmap = BitmapFactory.decodeStream(is);
-                    info.setBitmap(bitmap);
-
-                    customAdapter.notifyDataSetChanged();
-                }
-
-                @Override
-                public void onFailure(Call<ResponseBody> call, Throwable t) {
-
-                }
-            });
+            new ImageDownThread(i , info.getURL(),this).start();
         }
-        statusTextView.setText("finish getBrowseModel");
-        curPageTextView.setText(""+currentPage);
-        setPrevBtnEnable(true);
-        setNextBtnEnable(true);
+    }
+
+    @Override
+    public void OnFinishImageDownLoad(Bitmap result, int pos) {
+        ItemInfo info = itemList.get(pos);
+        info.getThumbInfo().setBitmap(result);
+        customAdapter.notifyDataSetChanged();
     }
 
     private class BrowseInfo
@@ -218,9 +194,11 @@ public class MainActivity extends AppCompatActivity implements IBrowseModelListe
 
                         listener.OnAddItemInfo(
                                 new ThumbInfo(imgUrl
-                                        ,model.getThumb().getWidth()
-                                        ,model.getThumb().getHeight()
-                                        ,isBookcover),model);
+                                ,model.getThumb().getWidth()
+                                ,model.getThumb().getHeight()
+                                ,isBookcover
+                                ,BitmapFactory.decodeResource(getResources(),R.drawable.loading))
+                                ,model);
                     }
 
                     listener.OnFinishBrowseModelRequest();
@@ -228,7 +206,7 @@ public class MainActivity extends AppCompatActivity implements IBrowseModelListe
 
                 @Override
                 public void onFailure(Call<BrowseModel> call, Throwable t) {
-                    Toast.makeText(MainActivity.this, Const.MSG_FAIL_INIT, Toast.LENGTH_SHORT).show();
+
                 }
             });
         }
