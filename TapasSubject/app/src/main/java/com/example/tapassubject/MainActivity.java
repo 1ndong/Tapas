@@ -1,8 +1,6 @@
 package com.example.tapassubject;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.loader.content.AsyncTaskLoader;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -10,21 +8,15 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
-import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.tapassubject.data.ItemInfo;
 import com.example.tapassubject.data.ThumbInfo;
 import com.example.tapassubject.list.CustomAdapter;
-import com.example.tapassubject.listener.IBrowseModelListener;
+import com.example.tapassubject.listener.IBrowseThreadListener;
 import com.example.tapassubject.listener.IImageDownLoadListener;
 import com.example.tapassubject.model.BrowseModel;
 import com.example.tapassubject.model.PaginationModel;
@@ -32,17 +24,14 @@ import com.example.tapassubject.model.SeriesModel;
 import com.example.tapassubject.retrofit.RetrofitConnector;
 import com.example.tapassubject.thread.ImageDownThread;
 
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import okhttp3.Headers;
-import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MainActivity extends AppCompatActivity implements IBrowseModelListener , IImageDownLoadListener {
+public class MainActivity extends AppCompatActivity implements IBrowseThreadListener, IImageDownLoadListener {
 
     public enum eActionType
     {
@@ -141,7 +130,7 @@ public class MainActivity extends AppCompatActivity implements IBrowseModelListe
     }
 
     @Override
-    public void OnFinishBrowseModelRequest(eActionType actionType) {
+    public void OnFinishBrowseThread(eActionType actionType) {
         customAdapter.notifyDataSetChanged();
         statusTextView.setText("finish getBrowseModel");
         isLoadingMoreData = false;
@@ -177,10 +166,10 @@ public class MainActivity extends AppCompatActivity implements IBrowseModelListe
     private class BrowseThread extends Thread {
 
         private BrowseInfo info;
-        private IBrowseModelListener listener;
+        private IBrowseThreadListener listener;
         private eActionType actionType;
 
-        public BrowseThread(IBrowseModelListener listener , BrowseInfo info , eActionType actionType)
+        public BrowseThread(IBrowseThreadListener listener , BrowseInfo info , eActionType actionType)
         {
             this.listener = listener;
             this.info = info;
@@ -219,7 +208,7 @@ public class MainActivity extends AppCompatActivity implements IBrowseModelListe
                                 ,model);
                     }
 
-                    listener.OnFinishBrowseModelRequest(actionType);
+                    listener.OnFinishBrowseThread(actionType);
                 }
 
                 @Override
