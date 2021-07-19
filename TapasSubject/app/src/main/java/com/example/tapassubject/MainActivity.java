@@ -130,7 +130,7 @@ public class MainActivity extends AppCompatActivity implements IBrowseModelListe
         customAdapter.notifyDataSetChanged();
         statusTextView.setText("finish getBrowseModel");
         isLoadingMoreData = false;
-        loadBar.setVisibility(View.INVISIBLE);
+        loadBar.setVisibility(View.GONE);
 
         for(int i = 0 ; i < itemList.size() ; ++i)
         {
