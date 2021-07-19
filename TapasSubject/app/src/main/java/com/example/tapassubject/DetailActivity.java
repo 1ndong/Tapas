@@ -4,7 +4,9 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.media.Image;
 import android.os.Bundle;
+import android.widget.ImageView;
 
 import com.example.tapassubject.listener.IEpisodeThreadListener;
 import com.example.tapassubject.listener.IImageDownLoadListener;
@@ -12,6 +14,7 @@ import com.example.tapassubject.listener.ISeriesThreadListener;
 import com.example.tapassubject.model.EpisodeModel;
 import com.example.tapassubject.model.SeriesModel;
 import com.example.tapassubject.retrofit.RetrofitConnector;
+import com.example.tapassubject.thread.ImageDownThread;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.reflect.TypeToken;
@@ -24,15 +27,24 @@ import retrofit2.Response;
 
 public class DetailActivity extends AppCompatActivity
         implements IEpisodeThreadListener , ISeriesThreadListener , IImageDownLoadListener {
-    SeriesModel model;
+
+    final int BOOKCOVER = 0;
+    final int THUMB = 1;
+
+    private SeriesModel model;
+    private ImageView imageView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
 
+        imageView = findViewById(R.id.detailimageview);
+
         Intent intent = getIntent();
         model = (SeriesModel)intent.getSerializableExtra("model");
+
+        new SeriesThread(this).start();
     }
 
     @Override
@@ -42,12 +54,31 @@ public class DetailActivity extends AppCompatActivity
 
     @Override
     public void OnFinishImageDownLoad(Bitmap result, int pos) {
+        int width = 300;
+        int height = 300;
 
+        if(pos == BOOKCOVER)
+        {
+            height = (int)(width * 1.5);
+        }
+
+        imageView.requestLayout();
+        imageView.getLayoutParams().width = width;
+        imageView.getLayoutParams().height = height;
+        imageView.setImageBitmap(result);
     }
 
     @Override
     public void OnFinishSeriesThread() {
+        int bitmapType = BOOKCOVER;
+        String url = model.getBook_cover_url();
+        if(url == null)
+        {
+            url = model.getThumb().getFile_url();
+            bitmapType = THUMB;
+        }
 
+        new ImageDownThread(bitmapType , url , this).start();
     }
 
     private class SeriesThread extends Thread
@@ -65,7 +96,7 @@ public class DetailActivity extends AppCompatActivity
             seriesModelCall.enqueue(new Callback<SeriesModel>() {
                 @Override
                 public void onResponse(Call<SeriesModel> call, Response<SeriesModel> response) {
-                    SeriesModel getModel = response.body();
+                    model = response.body();
 
                     listener.OnFinishSeriesThread();
                 }
