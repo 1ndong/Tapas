@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.loader.content.AsyncTaskLoader;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -42,12 +43,18 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity implements IBrowseModelListener , IImageDownLoadListener {
-    private RecyclerView recyclerView;
+
+    public enum eActionType
+    {
+        REFRESH,LOAD
+    }
+
     private CustomAdapter customAdapter;
     private List<ItemInfo> itemList = new ArrayList<>();
     private TextView statusTextView;
 
-    private ProgressBar refreshBar;
+    private SwipeRefreshLayout refreshLayout;
+    private RecyclerView recyclerView;
     private ProgressBar loadBar;
 
     private int currentPage = 1;
@@ -76,7 +83,14 @@ public class MainActivity extends AppCompatActivity implements IBrowseModelListe
 
         statusTextView = findViewById(R.id.statusTextView);
 
-        refreshBar = findViewById(R.id.refreshBar);
+        refreshLayout = findViewById(R.id.refreshlayout);
+        refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                itemList.clear();
+                makeBrowseThread(1,eActionType.REFRESH);
+            }
+        });
         loadBar = findViewById(R.id.loadBar);
 
         recyclerView = findViewById(R.id.recyclerView);
@@ -94,20 +108,21 @@ public class MainActivity extends AppCompatActivity implements IBrowseModelListe
                 {//끝에 도달했으면
                     if(!isLoadingMoreData)
                     {
-                        makeBrowseThread(curPaginationModel.getPage());
+                        makeBrowseThread(curPaginationModel.getPage(),eActionType.LOAD);
                         isLoadingMoreData = true;
                     }
                 }
             }
         });
 
-        makeBrowseThread(1);
+        makeBrowseThread(1,eActionType.LOAD);
     }
 
-    private void makeBrowseThread(int page)
+    private void makeBrowseThread(int page , eActionType actionType)
     {
-        loadBar.setVisibility(View.VISIBLE);
-        new BrowseThread(this , new BrowseInfo("COMICS",page)).start();
+        if(actionType == eActionType.LOAD)
+            loadBar.setVisibility(View.VISIBLE);
+        new BrowseThread(this , new BrowseInfo("COMICS",page) , actionType).start();
     }
 
     @Override
@@ -126,11 +141,12 @@ public class MainActivity extends AppCompatActivity implements IBrowseModelListe
     }
 
     @Override
-    public void OnFinishBrowseModelRequest() {
+    public void OnFinishBrowseModelRequest(eActionType actionType) {
         customAdapter.notifyDataSetChanged();
         statusTextView.setText("finish getBrowseModel");
         isLoadingMoreData = false;
         loadBar.setVisibility(View.GONE);
+        refreshLayout.setRefreshing(false);
 
         for(int i = 0 ; i < itemList.size() ; ++i)
         {
@@ -162,11 +178,13 @@ public class MainActivity extends AppCompatActivity implements IBrowseModelListe
 
         private BrowseInfo info;
         private IBrowseModelListener listener;
+        private eActionType actionType;
 
-        public BrowseThread(IBrowseModelListener listener , BrowseInfo info)
+        public BrowseThread(IBrowseModelListener listener , BrowseInfo info , eActionType actionType)
         {
             this.listener = listener;
             this.info = info;
+            this.actionType = actionType;
         }
 
         @Override
@@ -201,7 +219,7 @@ public class MainActivity extends AppCompatActivity implements IBrowseModelListe
                                 ,model);
                     }
 
-                    listener.OnFinishBrowseModelRequest();
+                    listener.OnFinishBrowseModelRequest(actionType);
                 }
 
                 @Override

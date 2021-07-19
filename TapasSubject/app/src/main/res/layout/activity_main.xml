@@ -22,14 +22,8 @@
             android:textSize="20sp"
             android:visibility="visible" />
 
-        <ProgressBar
-            android:id="@+id/refreshBar"
-            style="?android:attr/progressBarStyle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:visibility="gone" />
-
-        <LinearLayout
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:id="@+id/refreshlayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
@@ -41,7 +35,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:visibility="visible" />
-        </LinearLayout>
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
         <ProgressBar
             android:id="@+id/loadBar"
