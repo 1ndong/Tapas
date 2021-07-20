@@ -39,7 +39,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_weight="4"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:visibility="visible">
 
                 <TextView
                     android:id="@+id/detailtitle"
@@ -47,24 +48,23 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:gravity="center"
-                    android:text="TextView"
+                    android:text="로드중"
                     android:visibility="visible" />
 
-                <TextView
-                    android:id="@+id/detailcreator"
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/creatorrecyclerview"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:text="TextView"
+                    android:layout_weight="5"
                     android:visibility="visible" />
             </LinearLayout>
         </LinearLayout>
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/detailrecyclerview"
+            android:id="@+id/episoderecyclerview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            android:visibility="visible" />
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
