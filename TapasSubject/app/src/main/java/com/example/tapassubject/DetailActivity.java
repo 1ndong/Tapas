@@ -2,6 +2,7 @@ package com.example.tapassubject;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -16,6 +17,7 @@ import android.widget.TextView;
 
 import com.example.tapassubject.list.CreatorCustomAdapter;
 import com.example.tapassubject.list.EpisodeCustomAdapter;
+import com.example.tapassubject.list.RecyclerDecoration;
 import com.example.tapassubject.listener.IEpisodeThreadListener;
 import com.example.tapassubject.listener.IImageDownLoadListener;
 import com.example.tapassubject.listener.ISeriesThreadListener;
@@ -64,11 +66,19 @@ public class DetailActivity extends AppCompatActivity
         creatorRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         creatorCustomAdapter = new CreatorCustomAdapter(creatormodelItemList);
         creatorRecyclerView.setAdapter(creatorCustomAdapter);
+        {
+            RecyclerDecoration dividerItemDecoration = new RecyclerDecoration(20);
+            creatorRecyclerView.addItemDecoration(dividerItemDecoration);
+        }
 
         episodeRecyclerView = findViewById(R.id.episoderecyclerview);
         episodeRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         episodeCustomAdapter = new EpisodeCustomAdapter(episodeModelItemList);
         episodeRecyclerView.setAdapter(episodeCustomAdapter);
+        {
+            RecyclerDecoration dividerItemDecoration = new RecyclerDecoration(20);
+            episodeRecyclerView.addItemDecoration(dividerItemDecoration);
+        }
 
         Intent intent = getIntent();
         SeriesModel model = (SeriesModel)intent.getSerializableExtra("model");

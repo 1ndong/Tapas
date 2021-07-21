@@ -1,6 +1,7 @@
 package com.example.tapassubject;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -16,6 +17,7 @@ import android.widget.TextView;
 import com.example.tapassubject.data.ItemInfo;
 import com.example.tapassubject.data.ThumbInfo;
 import com.example.tapassubject.list.CustomAdapter;
+import com.example.tapassubject.list.RecyclerDecoration;
 import com.example.tapassubject.listener.IBrowseThreadListener;
 import com.example.tapassubject.listener.IImageDownLoadListener;
 import com.example.tapassubject.model.BrowseModel;
@@ -103,6 +105,9 @@ public class MainActivity extends AppCompatActivity implements IBrowseThreadList
                 }
             }
         });
+
+        RecyclerDecoration dividerItemDecoration = new RecyclerDecoration(20);
+        recyclerView.addItemDecoration(dividerItemDecoration);
 
         makeBrowseThread(1,eActionType.LOAD);
     }
