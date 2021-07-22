@@ -79,6 +79,7 @@ public class MainActivity extends AppCompatActivity implements IBrowseThreadList
             @Override
             public void onRefresh() {
                 itemList.clear();
+                customAdapter.notifyDataSetChanged();
                 makeBrowseThread(1,eActionType.REFRESH);
             }
         });
