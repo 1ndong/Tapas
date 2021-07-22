@@ -98,7 +98,7 @@ public class MainActivity extends AppCompatActivity implements IBrowseThreadList
 
                 if(lastvisibleItemPosition == itemTotalCount)
                 {//끝에 도달했으면
-                    if(!isLoadingMoreData)
+                    if(!isLoadingMoreData && curPaginationModel.isHas_next())
                     {
                         makeBrowseThread(curPaginationModel.getPage(),eActionType.LOAD);
                         isLoadingMoreData = true;
