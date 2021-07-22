@@ -11,7 +11,10 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ProgressBar;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.tapassubject.data.ItemInfo;
 import com.example.tapassubject.data.ThumbInfo;
@@ -42,6 +45,9 @@ public class MainActivity extends AppCompatActivity implements IBrowseThreadList
     private CustomAdapter customAdapter;
     private List<ItemInfo> itemList = new ArrayList<>();
     private TextView statusTextView;
+    private RadioButton radioComics;
+    private RadioButton radioCommunity;
+    private RadioGroup radioGroup;
 
     private SwipeRefreshLayout refreshLayout;
     private RecyclerView recyclerView;
@@ -74,6 +80,10 @@ public class MainActivity extends AppCompatActivity implements IBrowseThreadList
         statusTextView = findViewById(R.id.statusTextView);
         statusTextView.setVisibility(View.GONE);
 
+        radioComics = findViewById(R.id.radioComics);
+        radioCommunity = findViewById(R.id.radioCommunity);
+        radioGroup = findViewById(R.id.radioGroup);
+
         refreshLayout = findViewById(R.id.refreshlayout);
         refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -98,10 +108,17 @@ public class MainActivity extends AppCompatActivity implements IBrowseThreadList
 
                 if(lastvisibleItemPosition == itemTotalCount)
                 {//끝에 도달했으면
-                    if(!isLoadingMoreData && curPaginationModel.isHas_next())
+                    if(curPaginationModel != null && itemList.size() > 0)
                     {
-                        makeBrowseThread(curPaginationModel.getPage(),eActionType.LOAD);
-                        isLoadingMoreData = true;
+                        if(!curPaginationModel.isHas_next())
+                        {
+                            Toast.makeText(getApplicationContext() , Const.NOTANYMORE,Toast.LENGTH_SHORT).show();
+                        }
+                        else if(!isLoadingMoreData && curPaginationModel.isHas_next())
+                        {
+                            makeBrowseThread(curPaginationModel.getPage(),eActionType.LOAD);
+                            isLoadingMoreData = true;
+                        }
                     }
                 }
             }
@@ -110,14 +127,27 @@ public class MainActivity extends AppCompatActivity implements IBrowseThreadList
         RecyclerDecoration dividerItemDecoration = new RecyclerDecoration(20);
         recyclerView.addItemDecoration(dividerItemDecoration);
 
-        makeBrowseThread(1,eActionType.LOAD);
+        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup radioGroup, int i) {
+                itemList.clear();
+                curPaginationModel = null;
+                customAdapter.notifyDataSetChanged();
+                makeBrowseThread(1,eActionType.LOAD);
+            }
+        });
+        radioComics.setChecked(true);
     }
 
     private void makeBrowseThread(int page , eActionType actionType)
     {
         if(actionType == eActionType.LOAD)
             loadBar.setVisibility(View.VISIBLE);
-        new BrowseThread(this , new BrowseInfo("COMICS",page) , actionType).start();
+
+        String type = "COMICS";
+        if(radioGroup.getCheckedRadioButtonId() == R.id.radioCommunity)
+            type = "COMMUNITY";
+        new BrowseThread(this , new BrowseInfo(type,page) , actionType).start();
     }
 
     @Override
