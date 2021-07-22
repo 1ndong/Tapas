@@ -1,10 +1,8 @@
 package com.example.tapassubject.retrofit;
 
 import com.example.tapassubject.model.BrowseModel;
-import com.example.tapassubject.model.EpisodeModel;
 import com.example.tapassubject.model.SeriesModel;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;

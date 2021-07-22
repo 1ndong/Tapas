@@ -1,17 +1,12 @@
 package com.example.tapassubject;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.media.Image;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -19,7 +14,7 @@ import com.example.tapassubject.list.CreatorCustomAdapter;
 import com.example.tapassubject.list.EpisodeCustomAdapter;
 import com.example.tapassubject.list.RecyclerDecoration;
 import com.example.tapassubject.listener.IEpisodeThreadListener;
-import com.example.tapassubject.listener.IImageDownLoadListener;
+import com.example.tapassubject.listener.IImageDownloadThreadListener;
 import com.example.tapassubject.listener.ISeriesThreadListener;
 import com.example.tapassubject.model.CreatorModel;
 import com.example.tapassubject.model.EpisodeModel;
@@ -38,7 +33,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class DetailActivity extends AppCompatActivity
-        implements IEpisodeThreadListener , ISeriesThreadListener , IImageDownLoadListener {
+        implements IEpisodeThreadListener , ISeriesThreadListener , IImageDownloadThreadListener {
 
     final int BOOKCOVER = 0;
     final int THUMB = 1;

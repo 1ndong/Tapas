@@ -3,8 +3,7 @@ package com.example.tapassubject.thread;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
-import com.example.tapassubject.data.ThumbInfo;
-import com.example.tapassubject.listener.IImageDownLoadListener;
+import com.example.tapassubject.listener.IImageDownloadThreadListener;
 import com.example.tapassubject.retrofit.RetrofitConnector;
 
 import java.io.InputStream;
@@ -17,10 +16,10 @@ import retrofit2.Response;
 public class ImageDownThread extends Thread{
 
     private String url;
-    private IImageDownLoadListener listener;
+    private IImageDownloadThreadListener listener;
     private int pos;
 
-    public ImageDownThread(int pos , String url , IImageDownLoadListener listener)
+    public ImageDownThread(int pos , String url , IImageDownloadThreadListener listener)
     {
         this.pos = pos;
         this.url = url;

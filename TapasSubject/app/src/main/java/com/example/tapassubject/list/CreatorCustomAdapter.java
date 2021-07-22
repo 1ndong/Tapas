@@ -2,7 +2,6 @@ package com.example.tapassubject.list;
 
 import com.example.tapassubject.R;
 import com.example.tapassubject.model.CreatorModel;
-import com.example.tapassubject.model.SeriesModel;
 
 import android.content.Context;
 import android.view.LayoutInflater;

@@ -1,7 +1,6 @@
 package com.example.tapassubject;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -19,7 +18,7 @@ import com.example.tapassubject.data.ThumbInfo;
 import com.example.tapassubject.list.CustomAdapter;
 import com.example.tapassubject.list.RecyclerDecoration;
 import com.example.tapassubject.listener.IBrowseThreadListener;
-import com.example.tapassubject.listener.IImageDownLoadListener;
+import com.example.tapassubject.listener.IImageDownloadThreadListener;
 import com.example.tapassubject.model.BrowseModel;
 import com.example.tapassubject.model.PaginationModel;
 import com.example.tapassubject.model.SeriesModel;
@@ -33,7 +32,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MainActivity extends AppCompatActivity implements IBrowseThreadListener, IImageDownLoadListener {
+public class MainActivity extends AppCompatActivity implements IBrowseThreadListener, IImageDownloadThreadListener {
 
     public enum eActionType
     {
@@ -73,6 +72,7 @@ public class MainActivity extends AppCompatActivity implements IBrowseThreadList
         });
 
         statusTextView = findViewById(R.id.statusTextView);
+        statusTextView.setVisibility(View.GONE);
 
         refreshLayout = findViewById(R.id.refreshlayout);
         refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -151,9 +151,12 @@ public class MainActivity extends AppCompatActivity implements IBrowseThreadList
 
     @Override
     public void OnFinishImageDownLoad(Bitmap result, int pos) {
-        ItemInfo info = itemList.get(pos);
-        info.getThumbInfo().setBitmap(result);
-        customAdapter.notifyDataSetChanged();
+        if(itemList.size() > pos)
+        {
+            ItemInfo info = itemList.get(pos);
+            info.getThumbInfo().setBitmap(result);
+            customAdapter.notifyDataSetChanged();
+        }
     }
 
     private class BrowseInfo
